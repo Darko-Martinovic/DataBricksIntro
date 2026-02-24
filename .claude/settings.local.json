@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show pyspark)",
+      "Bash(jupyter kernelspec list)",
+      "Bash(python -c \"import pyspark; print\\(pyspark.__version__\\)\")",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(java -version)",
+      "Bash(echo \"JAVA_HOME=$JAVA_HOME\")",
+      "Bash(echo \"SPARK_HOME=$SPARK_HOME\")",
+      "Bash(echo \"HADOOP_HOME=$HADOOP_HOME\")",
+      "Bash(echo \"PYSPARK_PYTHON=$PYSPARK_PYTHON\")",
+      "Bash(python -c \":*)",
+      "Bash(python -c \"from databricks.connect import DatabricksSession; print\\(''DatabricksSession available''\\)\")",
+      "Bash(databricks auth env)"
+    ]
+  }
+}
