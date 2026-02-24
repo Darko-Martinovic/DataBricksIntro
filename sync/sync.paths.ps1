@@ -11,5 +11,10 @@ $NotebookMappings = @(
 		Local = "databricks-project/src/ManagedTables.ipynb"
 		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/ManagedTables"
 		Format = "JUPYTER"
+	},
+	@{
+		Local = "databricks-project/src/DataFrames.ipynb"
+		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/DataFrames"
+		Format = "JUPYTER"
 	}
 )
