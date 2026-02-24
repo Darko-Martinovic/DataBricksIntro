@@ -34,5 +34,5 @@ df=spark.read.format("csv").options(header='true').schema(schema).load(path)
 df.write.format("delta").mode("overwrite").save(outputPath)
 #spark.read.format("delta").load(outputPath).display()
 #df.show(truncate=False, n=300)
-df.display()
+df.show(20, truncate=False)
 #display(df) # it is possible to profile data 
