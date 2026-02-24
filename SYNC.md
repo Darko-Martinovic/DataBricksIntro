@@ -1,9 +1,15 @@
 # Databricks Sync Setup
 
-## Current default mapping
+## Dedicated synced folder
 
-- Remote: `/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com`
-- Local: `u`
+- Synced project folder: `databricks-project/`
+- Notebook allowed for sync: `databricks-project/src/Introduction to DataBricks.py`
+- Remote notebook target: `/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/Introduction to DataBricks`
+
+## Ignore/include guards
+
+- `.databricks-sync-ignore` is configured to ignore everything except `src/Introduction to DataBricks.py`.
+- `.databricks/project.json` includes only `src/Introduction to DataBricks.py`.
 
 ## Pull existing notebooks from Azure Databricks
 
@@ -17,23 +23,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\pull-notebooks.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\push-notebooks.ps1
 ```
 
-## Optional: sync one Shared subfolder
-
-Pull one Shared subfolder to `shared-selected/<SubPath>`:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\pull-shared-subfolder.ps1 -SubPath "Section 08"
-```
-
-Push that subfolder back:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\push-shared-subfolder.ps1 -SubPath "Section 08"
-```
-
 ## Notes
 
 - Notebooks are exported as source files (e.g. `.py`).
-- `push-notebooks.ps1` uses `--overwrite` and updates existing workspace content.
-- Some shared workspace folders can fail on Windows if remote names contain trailing spaces; this is a Windows filesystem limitation.
-- The optional Shared sync scripts are best used with specific safe subfolders (for example `Section 08`, `Section 09`, etc.).
+- `push-notebooks.ps1` uses `--overwrite` and updates only `Introduction to DataBricks` in your user workspace.
+- Keep large datasets, build artifacts, and unrelated files outside `databricks-project/`.
