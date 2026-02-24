@@ -1,0 +1,6 @@
+{
+  "sync": {
+    "include": ["src/Introduction to DataBricks.py"],
+    "exclude": ["**/*"]
+  }
+}

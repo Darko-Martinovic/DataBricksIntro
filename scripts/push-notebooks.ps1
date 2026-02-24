@@ -6,15 +6,13 @@ Set-Location $root
 
 . "$root/sync/sync.paths.ps1"
 
-foreach ($map in $Mappings) {
-    $localPath = Join-Path $root $map.Local
-    if (-not (Test-Path $localPath)) {
-        Write-Warning "Skipping missing local path: $($map.Local)"
-        continue
-    }
+$localFile = Join-Path $root $NotebookLocal
 
-    Write-Host "Importing $($map.Local) -> $($map.Remote)"
-    databricks workspace import-dir --profile $ProfileName --overwrite "$localPath" "$($map.Remote)"
+if (-not (Test-Path $localFile)) {
+    throw "Local notebook does not exist: $localFile"
 }
+
+Write-Host "Importing $NotebookLocal -> $NotebookRemote"
+databricks workspace import --profile $ProfileName --overwrite --format SOURCE --language PYTHON --file "$localFile" "$NotebookRemote"
 
 Write-Host "Push complete."

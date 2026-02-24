@@ -6,14 +6,14 @@ Set-Location $root
 
 . "$root/sync/sync.paths.ps1"
 
-foreach ($map in $Mappings) {
-    $localPath = Join-Path $root $map.Local
-    if (-not (Test-Path $localPath)) {
-        New-Item -ItemType Directory -Path $localPath | Out-Null
-    }
+$localFile = Join-Path $root $NotebookLocal
+$localDir = Split-Path -Parent $localFile
 
-    Write-Host "Exporting $($map.Remote) -> $($map.Local)"
-    databricks workspace export-dir --profile $ProfileName --overwrite "$($map.Remote)" "$localPath"
+if (-not (Test-Path $localDir)) {
+    New-Item -ItemType Directory -Path $localDir -Force | Out-Null
 }
+
+Write-Host "Exporting $NotebookRemote -> $NotebookLocal"
+databricks workspace export --profile $ProfileName --format SOURCE --file "$localFile" "$NotebookRemote"
 
 Write-Host "Pull complete."
