@@ -1,9 +1,6 @@
 {
   "sync": {
-    "include": [
-      "src/Introduction to DataBricks.py",
-      "src/ManagedTables.ipynb"
-    ],
+    "include": ["src/Introduction to DataBricks.py", "src/ManagedTables.ipynb"],
     "exclude": ["**/*"]
   }
 }
