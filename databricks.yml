@@ -1,0 +1,10 @@
+bundle:
+  name: databricks-workspace
+
+targets:
+  dev:
+    default: true
+    workspace:
+      profile: adb-7405614283227928
+      host: https://adb-7405614283227928.8.azuredatabricks.net
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
