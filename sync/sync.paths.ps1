@@ -2,10 +2,9 @@ $ProfileName = "adb-7405614283227928"
 $ProjectRoot = "databricks-project"
 $NotebookMappings = @(
 	@{
-		Local = "databricks-project/src/Introduction to DataBricks.py"
+		Local = "databricks-project/src/Introduction to DataBricks.ipynb"
 		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/Introduction to DataBricks"
-		Format = "SOURCE"
-		Language = "PYTHON"
+		Format = "JUPYTER"
 	},
 	@{
 		Local = "databricks-project/src/ManagedTables.ipynb"
