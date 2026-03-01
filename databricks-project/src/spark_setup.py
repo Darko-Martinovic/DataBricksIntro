@@ -14,3 +14,11 @@ except ImportError:
         )
     from pyspark.sql import SparkSession
     spark = SparkSession.builder.getOrCreate()
+
+
+def display(df, n=None):
+    """Local replacement for the Databricks built-in display().
+    Renders the DataFrame as a pandas table in the VS Code notebook output.
+    On Databricks the built-in display() is used instead (never imported from here).
+    """
+    return df.toPandas() if n is None else df.limit(n).toPandas()
