@@ -47,6 +47,11 @@ $NotebookMappings = @(
 		Format = "JUPYTER"
 	},
 	@{
+		Local = "databricks-project/src/Basic Math and Arithmetic Functions.ipynb"
+		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/Basic Math and Arithmetic Functions"
+		Format = "JUPYTER"
+	},
+	@{
 		Local = "databricks-project/src/spark_setup.py"
 		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/spark_setup"
 		Format = "SOURCE"
