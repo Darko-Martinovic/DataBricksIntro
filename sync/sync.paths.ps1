@@ -97,6 +97,11 @@ $NotebookMappings = @(
 		Format = "JUPYTER"
 	},
 	@{
+		Local = "databricks-project/src/Partition and Bucketing-Deep Dive.ipynb"
+		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/Partition and Bucketing-Deep Dive"
+		Format = "JUPYTER"
+	},
+	@{
 		Local = "databricks-project/src/spark_setup.py"
 		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/spark_setup"
 		Format = "SOURCE"
