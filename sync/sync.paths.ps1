@@ -102,6 +102,11 @@ $NotebookMappings = @(
 		Format = "JUPYTER"
 	},
 	@{
+		Local = "databricks-project/src/Explore DataSets.ipynb"
+		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/Explore DataSets"
+		Format = "JUPYTER"
+	},
+	@{
 		Local = "databricks-project/src/spark_setup.py"
 		Remote = "/Workspace/Users/darko.martinovic_outlook.com#ext#@darkomartinovicoutlook.onmicrosoft.com/spark_setup"
 		Format = "SOURCE"
