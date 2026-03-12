@@ -1,6 +1,6 @@
 {
   "sync": {
-    "include": ["src/Introduction to DataBricks.py", "src/ManagedTables.ipynb", "src/Working With Catalogs, Schemas and Volumes.ipynb", "src/UnionDataFrames.ipynb"],
+    "include": ["src/Introduction to DataBricks.py", "src/ManagedTables.ipynb", "src/Working With Catalogs, Schemas and Volumes.ipynb", "src/UnionDataFrames.ipynb", "src/Explore DataSets.ipynb"],
     "exclude": ["**/*"]
   }
 }
