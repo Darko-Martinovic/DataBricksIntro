@@ -133,6 +133,21 @@ $NotebookMappings = @(
 		Format = "JUPYTER"
 	},
 	@{
+		Local  = "databricks-project/src/27 - Delta Transaction Log.ipynb"
+		Remote = "$RemoteBase/27 - Delta Transaction Log"
+		Format = "JUPYTER"
+	},
+	@{
+		Local  = "databricks-project/src/28 - History and Time Travel.ipynb"
+		Remote = "$RemoteBase/28 - History and Time Travel"
+		Format = "JUPYTER"
+	},
+	@{
+		Local  = "databricks-project/src/29 - Schema Evolution.ipynb"
+		Remote = "$RemoteBase/29 - Schema Evolution"
+		Format = "JUPYTER"
+	},
+	@{
 		Local  = "databricks-project/src/spark_setup.py"
 		Remote = "$RemoteBase/spark_setup"
 		Format = "SOURCE"
