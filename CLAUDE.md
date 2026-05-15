@@ -33,6 +33,7 @@ The fallback runs only when the notebook is executed *on* a Databricks cluster (
 - `~/.databrickscfg` profile: `adb-7405614283227928`, with `serverless_compute_id = auto`.
 - The Databricks CLI used by sync scripts comes from the VSCode extension bundle (`%USERPROFILE%\.vscode\extensions\databricks.databricks-*\bin\databricks.exe`). When the extension updates, the path in `kernel.json` must be updated too — extension version is part of the path.
 - **Never create clusters** without explicit user permission (compute cost). Serverless via `serverless_compute_id = auto` is the default path.
+- The OAuth refresh token in `~/.databrickscfg` expires (~90 days). When `databricks-cli` auth fails with *"refresh token is invalid"*, run `powershell -ExecutionPolicy Bypass -File .\scripts\databricks-login.ps1` — it auto-discovers the CLI (surviving extension upgrades) and runs `auth login --profile $ProfileName` against the profile from `sync/sync.paths.ps1`. After it returns, restart the Jupyter kernel so the next bootstrap cell picks up the new token.
 
 ## Sync to/from the Azure workspace
 
