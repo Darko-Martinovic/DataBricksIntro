@@ -83,3 +83,12 @@ The `Streaming/` notebooks run against the same serverless compute as the rest o
 - **Checkpoint locations must live on a Unity Catalog volume** (`/Volumes/...`), not `/tmp/` or `dbfs:/`. Demo cells append a per-run uuid suffix (`_{uuid.uuid4().hex[:8]}`) so re-running the cell doesn't collide with a prior checkpoint — copy that pattern when adding new streaming examples.
 
 These constraints tend to bite one at a time when changing trigger mode or checkpoint paths. Account for both together when editing a streaming cell, rather than fixing the trigger and re-running into a checkpoint error on the next try.
+
+### Pandas UDFs and `foreachBatch` need matching client/server Python (Databricks Connect)
+
+Cells that ship Python code to be executed on the cluster — `@pandas_udf`, `@udf`, `foreachBatch(fn)`, `foreach(...)` — fail with `[PYTHON_VERSION_MISMATCH] Python versions in the Spark Connect client and server are different` when the local venv's Python *minor* version (e.g. 3.11) doesn't match the serverless compute environment's. Catalyst built-ins (`F.when`, `F.create_map`, `F.from_json`, etc.) are evaluated server-side without shipping Python and are unaffected.
+
+Symptoms and rule of thumb:
+- Non-UDF streaming cells (filter, projection, JSON parse, explode) succeed; UDF / `foreachBatch` cells fail with the same error.
+- The error names the constraint but not the server's Python version. Probe it with one cell: `import sys; print(sys.version); spark.sql("SELECT current_version()").show(truncate=False)` — the Spark version maps to a Databricks Runtime / Serverless environment, which maps to a Python version per the Databricks release notes.
+- When unavoidable on serverless: prefer Catalyst built-ins, or wrap the UDF/`foreachBatch` cell in `try/except SparkConnectGrpcException` so the rest of the notebook keeps running. The repo already does this in `Streaming/03 - Streaming Transformations.ipynb` for the `foreachBatch` demo.
