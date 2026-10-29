@@ -20,7 +20,7 @@ if (-not $DatabricksCli) {
 }
 if (-not $DatabricksCli) { throw "Databricks CLI not found. Install it or ensure the VSCode Databricks extension is installed." }
 
-. "$root/sync/sync.paths.ps1"
+. "$PSScriptRoot/sync.paths.ps1"
 
 $sharedRoot = "/Workspace/Shared/Azure-Databricks-and-Spark-SQL-Python"
 $normalizedSubPath = $SubPath.Trim('/').Replace('\\', '/')

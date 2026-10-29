@@ -1,6 +1,6 @@
 # Databricks Intro
 
-A hands-on PySpark and Databricks learning workspace: 60 Jupyter notebooks that run **from VS Code on your own machine** against an Azure Databricks workspace through [Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/index.html) and serverless compute. The same notebooks also run unchanged inside the Databricks workspace.
+A hands-on PySpark and Databricks learning workspace: 61 Jupyter notebooks that run **from VS Code on your own machine** against an Azure Databricks workspace through [Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/index.html) and serverless compute. The same notebooks also run unchanged inside the Databricks workspace.
 
 The notebooks go from the first DataFrame to Delta Lake internals, Structured Streaming, slowly changing dimensions and UDFs in Unity Catalog. Each one is self-contained: a short explanation, runnable cells, and links to the official docs.
 
@@ -19,7 +19,7 @@ The notebooks go from the first DataFrame to Delta Lake internals, Structured St
 - [Syncing with the workspace](#syncing-with-the-workspace)
 - [Serverless gotchas](#serverless-gotchas)
 - [Repository layout](#repository-layout)
-- [Credits](#credits)
+- [Credits and license](#credits-and-license)
 
 ---
 
@@ -35,21 +35,17 @@ flowchart LR
     P["scripts/*.ps1"] -- "workspace import / export" --> W["/Workspace/Users/&lt;you&gt;/"]
 ```
 
-The query plan is built locally and executed on Databricks; only results come back. Every notebook starts with the same bootstrap (also in [`spark_setup.py`](databricks-project/src/spark_setup.py)):
+The query plan is built locally and executed on Databricks; only results come back. Every notebook starts with the same cell:
 
 ```python
-import os, sys
-try:
-    from databricks.connect import DatabricksSession
-    spark = DatabricksSession.builder.getOrCreate()      # local: Databricks Connect
-except ImportError:
-    if not os.getenv("DATABRICKS_RUNTIME_VERSION"):
-        raise RuntimeError("Wrong kernel: select .venv in VS Code")
-    from pyspark.sql import SparkSession
-    spark = SparkSession.builder.getOrCreate()           # inside a Databricks cluster
+import os
+if not os.getenv("DATABRICKS_RUNTIME_VERSION"):
+    from spark_setup import spark, display  # local run through Databricks Connect
+
+DATA_ROOT = "/Volumes/population_metrics/landing/datasets"
 ```
 
-The guard matters: with plain PySpark on the system Python, a wrong kernel would quietly start a local JVM instead of failing. `spark_setup.display(df, n)` stands in for Databricks' built-in `display()` when running locally.
+Inside Databricks the import is skipped and the built-in `spark` and `display()` are used. Locally, [`spark_setup.py`](databricks-project/src/spark_setup.py) opens a `DatabricksSession` and provides a `display(df, n=1000)` that renders the first rows as a table. It refuses to start on the wrong kernel: with plain PySpark on the system Python, a wrong kernel would quietly start a local JVM instead of failing.
 
 ---
 
@@ -70,7 +66,7 @@ The guard matters: with plain PySpark on the system Python, a wrong kernel would
 | | 09 | [Changing Data Types](databricks-project/src/09%20-%20Changing%20Data%20Types.ipynb) |
 | | 10 | [Basic Math and Arithmetic Functions](databricks-project/src/10%20-%20Basic%20Math%20and%20Arithmetic%20Functions.ipynb) |
 | **Aggregating and reshaping** | 11 | [Grouping and Aggregation](databricks-project/src/11%20-%20Grouping%20and%20Aggregation.ipynb) |
-| | 12 | [Grouping and Aggregation (archive)](databricks-project/src/12%20-%20Grouping%20and%20Aggregation%20Archive.ipynb) |
+| | 12 | [Grouping and Aggregation on the countries data](databricks-project/src/12%20-%20Grouping%20and%20Aggregation%20Archive.ipynb) |
 | | 13 | [Pivoting and Unpivoting](databricks-project/src/13%20-%20Pivoting%20and%20Unpivoting.ipynb) |
 | | 14 | [Union DataFrames](databricks-project/src/14%20-%20Union%20DataFrames.ipynb) |
 | | 15 | [Working with Views](databricks-project/src/15%20-%20Working%20With%20Views.ipynb) |
@@ -173,10 +169,11 @@ The guard matters: with plain PySpark on the system Python, a wrong kernel would
 
 ```powershell
 py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "databricks-connect" pandas pyarrow
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\pre-commit.exe install     # strips notebook outputs on every commit
 ```
 
-Install Databricks Connect into a venv of its own: it ships its own `pyspark` and conflicts with a standalone PySpark install. For serverless, pin `databricks-connect` to the major version of the workspace's [serverless environment](https://docs.databricks.com/en/release-notes/serverless/index.html) and use that environment's Python version.
+Install Databricks Connect into a venv of its own: it ships its own `pyspark` and conflicts with a standalone PySpark install. [`requirements.txt`](requirements.txt) pins `databricks-connect` to 16.1; keep it in step with the workspace's [serverless environment](https://docs.databricks.com/en/release-notes/serverless/index.html) and use that environment's Python version.
 
 ### 2. Sign in
 
@@ -189,7 +186,7 @@ auth_type             = databricks-cli
 serverless_compute_id = auto
 ```
 
-Put the same profile name in `$ProfileName` in [`sync/sync.paths.ps1`](sync/sync.paths.ps1), then log in (a browser window opens):
+Put the same profile name in `$ProfileName`, and your workspace user folder in `$RemoteBase`, in [`scripts/sync.paths.ps1`](scripts/sync.paths.ps1), then log in (a browser window opens):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\databricks-login.ps1
@@ -201,9 +198,11 @@ The refresh token lasts about 90 days. When a cell fails with *"refresh token is
 
 Open a notebook in VS Code and choose **Select Kernel → Python Environments → Enter interpreter path**, then point it at `.venv\Scripts\python.exe` (the venv does not always appear in the list). The first cell should print nothing and leave a `spark` session ready.
 
+[`.vscode/settings.json`](.vscode/settings.json) starts every kernel in `databricks-project/src`, so notebooks in subfolders such as `Streaming/` find `spark_setup.py` too.
+
 ### 4. Load the sample data
 
-Most notebooks read the countries dataset from a Unity Catalog volume. Create the catalog `population_metrics`, schema `landing` and volume `datasets` (notebook 21 shows the SQL), then upload the folder [`csv_data/`](sync/shared/Section%2008/02%20Uploading%20the%20Countries%20Data%20to%20Landing%20Volume/csv_data) so that the files land here (the `countries_dataset` folder appears twice in the paths the notebooks use):
+Most notebooks read the countries dataset from a Unity Catalog volume. Create the catalog `population_metrics`, schema `landing` and volume `datasets` (notebook 21 shows the SQL), then upload the folder [`data/csv_data/`](data/csv_data) so that the files land here (the `countries_dataset` folder appears twice in the paths the notebooks use):
 
 ```
 /Volumes/population_metrics/landing/datasets/countries_dataset/countries_dataset/csv_data/
@@ -213,13 +212,13 @@ Most notebooks read the countries dataset from a Unity Catalog volume. Create th
 └── country_sub_regions/country_sub_regions.csv
 ```
 
-The Delta and streaming notebooks write their own tables, demo files and checkpoints under the same volume.
+The notebooks build these paths from `DATA_ROOT`, set in their first cell. The Delta and streaming notebooks write their own tables, demo files and checkpoints under the same volume. Table names are two-part (`default.country_population`), so they resolve against your workspace's current catalog.
 
 ---
 
 ## Syncing with the workspace
 
-The local `.ipynb` files are the source of truth. [`sync/sync.paths.ps1`](sync/sync.paths.ps1) maps each local notebook to its path under `/Workspace/Users/<you>/`; add a new notebook there if it should sync.
+The local `.ipynb` files are the source of truth. [`scripts/sync.paths.ps1`](scripts/sync.paths.ps1) finds every notebook under `databricks-project/src/` and maps it to the same relative path under `/Workspace/Users/<you>/`, subfolders included, so a new notebook syncs without any change there.
 
 ```powershell
 # Workspace -> local
@@ -228,12 +227,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\pull-notebooks.ps1
 # Local -> workspace (overwrites the remote copies)
 powershell -ExecutionPolicy Bypass -File .\scripts\push-notebooks.ps1
 
-# One folder of the shared course material
+# One folder of a shared workspace folder (e.g. a course's), into shared-selected/
 .\scripts\pull-shared-subfolder.ps1 -SubPath "Section 08/05 Reading CSV Data into DataFrames"
 .\scripts\push-shared-subfolder.ps1 -SubPath "Section 08/05 Reading CSV Data into DataFrames"
 ```
 
-`.ipynb` files sync in `JUPYTER` format. A `.py` notebook such as `spark_setup.py` syncs as `SOURCE` with `PYTHON` and must start with `# Databricks notebook source`. `databricks.yml` holds a Databricks Asset Bundle target, but the scripts are the main path.
+A push creates the remote subfolders first; a pull skips notebooks that were never pushed. `shared-selected/` is gitignored, so material pulled from a shared folder stays out of the repository. `.ipynb` files sync in `JUPYTER` format. A `.py` notebook such as `spark_setup.py` syncs as `SOURCE` with `PYTHON` and must start with `# Databricks notebook source`. `databricks.yml` holds a Databricks Asset Bundle target, but the scripts are the main path.
 
 ---
 
@@ -244,7 +243,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\push-notebooks.ps1
 | `trigger(processingTime=...)` is rejected | Serverless streaming supports finite triggers only | Use `trigger(availableNow=True)` |
 | Checkpoint path errors | Checkpoints must live on a Unity Catalog volume | Write to `/Volumes/...` with a per-run suffix, e.g. `f"..._{uuid.uuid4().hex[:8]}"` |
 | `[PYTHON_VERSION_MISMATCH]` on `@udf`, `@pandas_udf` or `foreachBatch` | Local and serverless Python minor versions differ | Match the venv's Python to the serverless environment, or use built-in functions, which run on the server without shipping Python |
-| `SparkSession.builder` is blocked | Databricks Connect replaces it | Use `DatabricksSession.builder` (the bootstrap does this) |
+| `SparkSession.builder` is blocked | Databricks Connect replaces it | Use `DatabricksSession.builder` (`spark_setup.py` does this) |
 | Notebook hangs at the first cell | Wrong kernel; a local JVM is starting | Select `.venv` as the kernel |
 
 ---
@@ -260,20 +259,25 @@ powershell -ExecutionPolicy Bypass -File .\scripts\push-notebooks.ps1
 │       ├── SCD/              #   slowly changing dimensions
 │       ├── Optimization/     #   EXPLAIN and query plans
 │       ├── LakeFlow Jobs/    #   orchestration
-│       └── spark_setup.py    #   shared bootstrap and local display()
-├── scripts/                  # PowerShell: login, push and pull notebooks
-├── sync/
-│   ├── sync.paths.ps1        # profile name and local ↔ workspace mapping
-│   └── shared/               # reference copy of the course's notebooks and data
+│       └── spark_setup.py    #   local Spark session and display()
+├── data/csv_data/            # the countries CSVs to upload to the volume
+├── scripts/
+│   ├── sync.paths.ps1        #   profile, workspace folder, local ↔ workspace mapping
+│   └── *.ps1                 #   login, push and pull notebooks
+├── requirements.txt          # the venv (databricks-connect pinned)
+├── .pre-commit-config.yaml   # nbstripout: notebooks are committed without outputs
 ├── databricks.yml            # Databricks Asset Bundle target (optional path)
-├── SYNC.md                   # notes on the sync setup
 └── CLAUDE.md                 # notes for AI coding assistants working in this repo
 ```
 
+Notebooks are committed without outputs, so run them to see results.
+
 ---
 
-## Credits
+## Credits and license
 
-The material under `sync/shared/` comes from the Udemy course **Azure Databricks and Spark SQL (Python)** and is kept here as a reference for the course's sections. The notebooks under `databricks-project/` are my own study notes, written while working through the course and the [Databricks documentation](https://docs.databricks.com/).
+The notebooks are my own study notes, written while working through the Udemy course **Azure Databricks and Spark SQL (Python)** and the [Databricks documentation](https://docs.databricks.com/). The countries dataset in `data/` is the sample data that course uses. The course's own notebooks are not part of this repository.
+
+Code and notebooks are released under the [MIT License](LICENSE).
 
 **Author:** [Darko Martinović](https://github.com/Darko-Martinovic)

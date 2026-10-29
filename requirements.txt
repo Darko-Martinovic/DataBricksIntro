@@ -1,0 +1,9 @@
+# The local venv for running the notebooks through Databricks Connect.
+# databricks-connect must match the workspace's serverless environment (major.minor),
+# and the venv's Python must match that environment's Python minor version (3.11 here).
+databricks-connect==16.1.*
+pandas==3.0.1
+pyarrow==23.0.1
+ipykernel==7.2.0
+# strips notebook outputs on commit (.pre-commit-config.yaml)
+pre-commit

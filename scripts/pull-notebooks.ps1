@@ -13,7 +13,7 @@ if (-not $DatabricksCli) {
 }
 if (-not $DatabricksCli) { throw "Databricks CLI not found. Install it or ensure the VSCode Databricks extension is installed." }
 
-. "$root/sync/sync.paths.ps1"
+. "$PSScriptRoot/sync.paths.ps1"
 
 foreach ($notebook in $NotebookMappings) {
     $localFile = Join-Path $root $notebook.Local
@@ -25,6 +25,8 @@ foreach ($notebook in $NotebookMappings) {
 
     Write-Host "Exporting $($notebook.Remote) -> $($notebook.Local)"
     & $DatabricksCli workspace export --profile $ProfileName --format $notebook.Format --file "$localFile" "$($notebook.Remote)"
+    # A notebook that was never pushed has no remote copy yet: keep the local one and go on
+    if ($LASTEXITCODE -ne 0) { Write-Warning "Skipped $($notebook.Remote) (export failed)" }
 }
 
 Write-Host "Pull complete."

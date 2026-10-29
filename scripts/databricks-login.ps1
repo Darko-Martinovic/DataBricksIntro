@@ -14,7 +14,7 @@ if (-not $DatabricksCli) {
 }
 if (-not $DatabricksCli) { throw "Databricks CLI not found. Install it or ensure the VSCode Databricks extension is installed." }
 
-. "$root/sync/sync.paths.ps1"
+. "$PSScriptRoot/sync.paths.ps1"
 
 Write-Host "Refreshing OAuth token for profile '$ProfileName' via $DatabricksCli"
 Write-Host "A browser window will open — sign in to the Databricks workspace to complete login."
