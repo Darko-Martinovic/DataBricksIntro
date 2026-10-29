@@ -3,27 +3,11 @@ import json, pathlib
 
 OUT = pathlib.Path(__file__).parent
 
-BOOTSTRAP = '''import os, sys
+BOOTSTRAP = '''import os
+if not os.getenv("DATABRICKS_RUNTIME_VERSION"):
+    from spark_setup import spark, display  # local run through Databricks Connect
 
-try:
-    from databricks.connect import DatabricksSession
-    spark = DatabricksSession.builder.getOrCreate()
-except ImportError:
-    if not os.getenv("DATABRICKS_RUNTIME_VERSION"):
-        raise RuntimeError(
-            f"Wrong Python kernel \\u2014 'databricks.connect' not found in:\\n  {sys.executable}\\n\\n"
-            "In VSCode: click the kernel selector (top-right of notebook) "
-            "and choose the interpreter at:\\n"
-            r"  C:\\Source\\Dsa\\DataBricks\\.venv\\Scripts\\python.exe"
-        )
-    from pyspark.sql import SparkSession
-    spark = SparkSession.builder.getOrCreate()
-
-from pyspark.sql import functions as F
-
-
-def display(df, n=20):
-    df.show(n, truncate=False)'''
+from pyspark.sql import functions as F'''
 
 
 def md(text): return {"cell_type": "markdown", "metadata": {}, "source": text.splitlines(keepends=True)}

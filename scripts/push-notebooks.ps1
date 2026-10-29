@@ -14,7 +14,7 @@ if (-not $DatabricksCli) {
 }
 if (-not $DatabricksCli) { throw "Databricks CLI not found. Install it or ensure the VSCode Databricks extension is installed." }
 
-. "$root/sync/sync.paths.ps1"
+. "$PSScriptRoot/sync.paths.ps1"
 
 foreach ($notebook in $NotebookMappings) {
     $localFile = Join-Path $root $notebook.Local
@@ -23,6 +23,11 @@ foreach ($notebook in $NotebookMappings) {
         throw "Local notebook does not exist: $localFile"
     }
 
+    # Notebooks in subfolders (Streaming/, SCD/, ...) need their remote folder to exist first
+    $remoteDir = $notebook.Remote.Substring(0, $notebook.Remote.LastIndexOf('/'))
+    & $DatabricksCli workspace mkdirs --profile $ProfileName "$remoteDir"
+    if ($LASTEXITCODE -ne 0) { throw "Could not create $remoteDir" }
+
     Write-Host "Importing $($notebook.Local) -> $($notebook.Remote)"
     if ($notebook.ContainsKey("Language")) {
         & $DatabricksCli workspace import --profile $ProfileName --overwrite --format $notebook.Format --language $notebook.Language --file "$localFile" "$($notebook.Remote)"
@@ -30,6 +35,7 @@ foreach ($notebook in $NotebookMappings) {
     else {
         & $DatabricksCli workspace import --profile $ProfileName --overwrite --format $notebook.Format --file "$localFile" "$($notebook.Remote)"
     }
+    if ($LASTEXITCODE -ne 0) { throw "Import failed: $($notebook.Local)" }
 }
 
 Write-Host "Push complete."
